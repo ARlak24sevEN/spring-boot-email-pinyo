@@ -1,5 +1,8 @@
 package com.iamnbty.training.backend.config;
 
+
+import com.iamnbty.training.backend.config.token.TokenFilterConfiguerer;
+import com.iamnbty.training.backend.service.TokenService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +14,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+   private final TokenService tokenService;
+
+    public SecurityConfig(TokenService tokenService) {
+        this.tokenService = tokenService;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -27,8 +36,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().disable().csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().authorizeRequests().antMatchers("/user/register", "/user/login","/user/hello").anonymous()
-                .anyRequest().authenticated();
+                .and().authorizeRequests().antMatchers("/user/register", "/user/login").anonymous()
+                .anyRequest().authenticated()
+                .and().apply(new TokenFilterConfiguerer(tokenService));
     }
 
 }
