@@ -21,6 +21,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         this.tokenService = tokenService;
     }
 
+
+    private final String[] PUBLIC = {
+            "/actuator/**",
+            "/user/register",
+            "/user/login",
+            "/socket/**" //this link like a set at websocket config => addEndPoint
+    };
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -36,7 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().disable().csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().authorizeRequests().antMatchers("/actuator/**","/user/register", "/user/login").anonymous()
+                .and().authorizeRequests().antMatchers(PUBLIC).anonymous()
                 .anyRequest().authenticated()
                 .and().apply(new TokenFilterConfiguerer(tokenService));
     }
