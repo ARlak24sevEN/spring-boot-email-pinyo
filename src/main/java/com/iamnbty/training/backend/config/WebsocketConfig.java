@@ -20,7 +20,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/socket")
-                .setAllowedOriginPatterns("http://*")//this allowed cors from another port such as frontend
+                .setAllowedOriginPatterns("http://localhost*")//this allowed cors from another port such as frontend
                 .withSockJS();
     }
 }
