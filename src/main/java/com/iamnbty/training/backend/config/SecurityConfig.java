@@ -33,8 +33,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/actuator/**",
             "/user/register",
             "/user/login",
-            "/socket/**", //this link like a set at websocket config => addEndPoint
-            "/chat/**"
+            "/socket/**" //this link like a set at websocket config => addEndPoint
+//            "/chat/**"
     };
 
     @Bean
@@ -50,29 +50,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().disable().csrf().disable()
+        http.cors(config -> {
+                    CorsConfiguration cors = new CorsConfiguration();
+                    cors.setAllowCredentials(true);
+                    cors.setAllowedOriginPatterns(Collections.singletonList("http://*"));
+                    cors.addAllowedHeader("*");
+                    cors.addAllowedMethod("GET");
+                    cors.addAllowedMethod("POST");
+                    cors.addAllowedMethod("PUT");
+                    cors.addAllowedMethod("DELETE");
+                    cors.addAllowedMethod("OPTIONS");
+
+                    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                    source.registerCorsConfiguration("/**", cors);
+
+                    config.configurationSource(source);
+                }).csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().authorizeRequests().antMatchers(PUBLIC).anonymous()
                 .anyRequest().authenticated()
                 .and().apply(new TokenFilterConfiguerer(tokenService));
     }
-
-    @Bean
-    public CorsFilter corsFilter(){
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-//        config.setAllowedOriginPatterns(Collections.singletonList("http://localhost*"));
-     //   config.setAllowedOriginPatterns(Array.asList("http://localhost*"));
-        config.setAllowedOriginPatterns(Arrays.asList("http://localhost*"));
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("OPTIONS");
-        config.addAllowedMethod("GET");
-        config.addAllowedMethod("POST");
-        config.addAllowedMethod("PUT");
-        config.addAllowedMethod("DELETE");
-        source.registerCorsConfiguration("/**",config);
-        return new CorsFilter(source);
-    }
-
 }
