@@ -4,9 +4,13 @@ import com.iamnbty.training.backend.entity.User;
 import com.iamnbty.training.backend.exception.BaseException;
 import com.iamnbty.training.backend.exception.UserException;
 import com.iamnbty.training.backend.repository.UserRepository;
+import com.iamnbty.training.backend.util.SecurityUtil;
+import lombok.Data;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -23,6 +27,10 @@ public class UserService {
     }
     public Optional<User> findById(String id) {
         return repository.findById(id);
+    }
+
+    public Optional<User> findByToken(String token) {
+        return repository.findByToken(token);
     }
 
     public Optional<User> findByEmail(String email) {
@@ -53,7 +61,7 @@ public class UserService {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
-    public User create(String email, String password, String name) throws BaseException {
+    public User create(String email, String password, String name ,String token) throws BaseException {
         // validate
         if (Objects.isNull(email)) {
             throw UserException.createEmailNull();
@@ -78,8 +86,16 @@ public class UserService {
         entity.setEmail(email);
         entity.setPassword(passwordEncoder.encode(password));
         entity.setName(name);
+        entity.setToken(token);
+        entity.setTokenExpire(nextXMinute(30));
 
         return repository.save(entity);
+    }
+
+    private Date nextXMinute(int minute){
+        Calendar calendar =  Calendar.getInstance();
+        calendar.add(Calendar.MINUTE,minute);
+        return calendar.getTime();
     }
 
 }

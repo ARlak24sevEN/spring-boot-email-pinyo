@@ -33,6 +33,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/actuator/**",
             "/user/register",
             "/user/login",
+            "/user/activate",
+            "/user/resend-activation-email",
             "/socket/**" //this link like a set at websocket config => addEndPoint
 //            "/chat/**"
     };
