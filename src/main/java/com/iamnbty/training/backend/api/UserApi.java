@@ -2,6 +2,7 @@ package com.iamnbty.training.backend.api;
 
 import com.iamnbty.training.backend.business.UserBusiness;
 import com.iamnbty.training.backend.exception.BaseException;
+import com.iamnbty.training.backend.exception.UserException;
 import com.iamnbty.training.backend.model.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,17 @@ public class UserApi {
 
     public UserApi(UserBusiness business) {
         this.business = business;
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<MUserProfile> getMyUserProfile() throws UserException {
+        MUserProfile response = business.getMyUserProfile();
+        return ResponseEntity.ok(response);
+    }
+    @PutMapping("/profile")
+    public ResponseEntity<MUserProfile> updateMyUserProfile(@RequestBody MUpdateUserProfileRequest request) throws UserException {
+        MUserProfile response = business.updateMyUserProfile(request);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
@@ -49,6 +61,12 @@ public class UserApi {
     public ResponseEntity<String> uploadProfilePicture(@RequestPart MultipartFile file) throws BaseException {
         String response = business.uploadProfilePicture(file);
         return ResponseEntity.ok(response);
+    }
+//todo tobe deleted
+    @DeleteMapping("/test-delete-my-account")
+    public ResponseEntity<Void>testDeleteMyAccount() throws UserException {
+        business.testDeleteMyAccount();
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/hello")

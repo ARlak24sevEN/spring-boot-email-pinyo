@@ -15,6 +15,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +41,40 @@ public class UserBusiness {
         this.tokenService = tokenService;
         this.emailBusiness = emailBusiness;
 
+    }
+
+    public MUserProfile getMyUserProfile() throws UserException {
+        Optional<String> opt = SecurityUtil.getCurrentUserId();
+        if (opt.isEmpty()) {
+            throw UserException.unauthorized();
+        }
+
+        String userId = opt.get();
+
+        Optional<User> optUser = userService.findById(userId);
+        if (optUser.isEmpty()) {
+            throw UserException.notFound();
+        }
+
+        return userMapper.toUserProfile(optUser.get());
+    }
+
+    public MUserProfile updateMyUserProfile(MUpdateUserProfileRequest request) throws UserException {
+        Optional<String> opt = SecurityUtil.getCurrentUserId();
+        if (opt.isEmpty()) {
+            throw UserException.unauthorized();
+        }
+
+        String userId = opt.get();
+
+        // validate
+        if (ObjectUtils.isEmpty(request.getName())) {
+            throw UserException.updateNameNull();
+        }
+
+        User user = userService.updateName(userId, request.getName());
+
+        return userMapper.toUserProfile(user);
     }
 
     public MLoginResponse login(MLoginRequest request) throws BaseException {
@@ -159,6 +194,17 @@ public class UserBusiness {
         } catch (BaseException e) {
             e.printStackTrace();
         }
+    }
+
+    //todo tobe deleted
+    public void testDeleteMyAccount() throws UserException {
+        Optional<String> opt = SecurityUtil.getCurrentUserId();
+        if (opt.isEmpty()) {
+            throw UserException.unauthorized();
+        }
+
+        String userId = opt.get();
+        userService.deleteById(userId);
     }
 
     public String uploadProfilePicture(MultipartFile file) throws BaseException {

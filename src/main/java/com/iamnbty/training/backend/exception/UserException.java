@@ -40,6 +40,11 @@ public class UserException extends BaseException {
         return new UserException("create.name.null");
     }
 
+    // UPDATE
+
+    public static UserException updateNameNull() {
+        return new UserException("update.name.null");
+    }
     // LOGIN
 
     public static UserException loginFailEmailNotFound() {

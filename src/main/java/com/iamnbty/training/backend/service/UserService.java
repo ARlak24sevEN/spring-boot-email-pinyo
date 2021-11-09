@@ -6,6 +6,10 @@ import com.iamnbty.training.backend.exception.UserException;
 import com.iamnbty.training.backend.repository.UserRepository;
 import com.iamnbty.training.backend.util.SecurityUtil;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@Log4j2
 public class UserService {
 
     private final UserRepository repository;
@@ -25,7 +30,9 @@ public class UserService {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
     }
+    @Cacheable(value = "user", key = "#id", unless = "#result == null") //value is name of catch  //key is id => name of variable of this function //catch when is not null
     public Optional<User> findById(String id) {
+        log.info("Load user From DB id "+id);
         return repository.findById(id);
     }
 
@@ -41,6 +48,7 @@ public class UserService {
         return repository.save(user);
     }
 
+    @CachePut(value = "user", key = "#id")
     public User updateName(String id, String name) throws UserException {
         Optional<User> opt = repository.findById(id);
         if (opt.isEmpty()) {
@@ -53,9 +61,17 @@ public class UserService {
         return repository.save(user);
     }
 
+    @CacheEvict(value = "user", key = "#id") //delete cache when delete user
     public void deleteById(String id) {
         repository.deleteById(id);
     }
+
+    @CacheEvict(value = "user", allEntries = true) //delete cache when delete user all
+    public void deleteAll(String id) {
+//        repository.deleteAll();
+    }
+
+
 
     public boolean matchPassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
